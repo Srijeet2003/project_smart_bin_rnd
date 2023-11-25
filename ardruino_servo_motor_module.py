@@ -1,5 +1,5 @@
 #importing modules
-
+from ultralytics import YOLO
 from pyfirmata import Arduino,SERVO,util
 from time import sleep
 
@@ -22,6 +22,9 @@ def rotateServo(pin,angle):
 ###############################################################
                 #machine learning code will be put here  
 ###############################################################
+# Load a model
+model = YOLO("yolov8n.yaml")
+model.train(data="coco128.yaml", epochs=3)  # train the model
 
 while True:
     #input will be taken from the output variable of the machine learning code
