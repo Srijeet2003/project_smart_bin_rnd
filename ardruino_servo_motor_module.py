@@ -6,7 +6,7 @@ import os
 import cv2
 
 #giving the particular port id from the ardruino ide
-port = 'COM3'
+port = '/dev/ttyACM0'
 pin1 = 10  # remeber to connect to digital pin only
 # pin2 = 11  # 1st servo for horizontol rotation and 2nd servo for vertical rotation 
 board=Arduino(port)
@@ -53,7 +53,7 @@ def rotateServo(pin,angle):
 
 while True:
     #input will be taken from the output variable of the machine learning code
-    x=input()
+    x=input("enter the choice:")
     
     # 1 : plastic waste and 2 : non plastic waste
     if x=="1":
