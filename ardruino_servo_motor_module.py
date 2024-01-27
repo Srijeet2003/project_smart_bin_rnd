@@ -1,7 +1,9 @@
 #importing modules
-# from ultralytics import YOLO
+from ultralytics import YOLO
 from pyfirmata import Arduino,SERVO,util
+from pymata4 import pymata4
 from time import sleep
+import time
 import os
 import cv2
 
@@ -9,7 +11,10 @@ import cv2
 port = '/dev/ttyACM0'
 pin1 = 10  # remeber to connect to digital pin only
 # pin2 = 11  # 1st servo for horizontol rotation and 2nd servo for vertical rotation 
+trig_pin = 12
+echo_pin = 13
 board=Arduino(port)
+board1=pymata4.Pymata4()
 
 #inittializing the servo module
 board.digital[pin1].mode=SERVO
@@ -19,6 +24,13 @@ def rotateServo(pin,angle):
     board.digital[pin].write(angle) 
     #need to add delays as per or machine learning code 
     sleep(0.15)
+    
+def servoCallback(data):
+    print("the level of garbage in bin is at height: ",data[2])
+    if data[2]<100:
+        print("the bin is full , please empty it")
+        
+board1.set_pin_mode_sonar(trig_pin,echo_pin,servoCallback)
 
 ###############################################################
                 #machine learning code will be put here  
@@ -64,4 +76,11 @@ while True:
         for i in range(0,180):
             rotateServo(pin1,i)
             # rotateServo(pin2,90) #to drop the garbage
-
+            
+    elif x=="3":
+        try:
+            time.sleep(0.1)
+            board1.sonar_read(trig_pin)
+        except:
+            board1.shutdown()
+            
