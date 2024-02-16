@@ -1,84 +1,74 @@
 #!/usr/bin/env python
 # coding: utf-8
 
-# In[48]:
-
-
-#get_ipython().system('pip install torch')
-#get_ipython().system('pip install ultralytics')
-#get_ipython().system('pip install opencv-python')
-
-
-# In[49]:
-
-
 from ultralytics import YOLO
-
-
-# In[58]:
-
-
-model1=YOLO('last (6).pt')
-
-
-# In[51]:
-
+model=YOLO('last (6).pt')
 
 import cv2
+import math
 import matplotlib.pyplot as plt
-def display(im_path):
-    dpi=80
-    im_data=plt.imread(im_path)
-    height,width,depth=im_data.shape
 
-    figsize=width/float(dpi), height/float(dpi)
+from pyfirmata import Arduino,SERVO,util
+from time import sleep
+port = '/dev/ttyACM0'
+pin1 = 10
+pin2 = 11
+board = Arduino(port)
+board.digital[pin1].mode = SERVO
+board.digital[pin2].mode = SERVO
+def rotateservo(pin,angle):
+    board.digital[pin].write(angle)
+    sleep(0.015)
 
-    fig=plt.figure(figsize=figsize)
-    ax=fig.add_axes([0,0,1,1])
+cap = cv2.VideoCapture(0)
+cap.set(3, 1080)
+cap.set(4, 720)
 
-    ax.axis('off')
+classNames=["non-plastic","plastic"]
 
-    ax.imshow(im_data, cmap='gray')
+while True:
+    ret, img= cap.read()
+    results = model(img, stream=True)
 
-    plt.show()
-
-
-# In[53]:
-
-
-#get_ipython().system('pip install pyfirmata')
-# from pyfirmata import Arduino,SERVO,util
-# from time import sleep
-# port = '/dev/ttyACM0'
-# pin = 10
-# board = Arduino(port)
-# board.digital[pin].mode = SERVO
-# def rotateservo(pin,angle):
-#     board.digital[pin].write(angle)
-#     sleep(0.015)
-
-
-# In[61]:
-
-
-from glob import glob
-waste_imgs = glob('/home/soumoroy/project_smart_bin_rnd/WhatsApp Image 2024-01-27 at 8.58.24 PM.jpeg')
-for img_file in waste_imgs:
-    img = cv2.imread(img_file)
-    results = model1.predict(conf=0.25, source=img_file, save_crop = True)
-    names = model1.names
-    display(img_file)
     for r in results:
-        for c in r.boxes.cls:
-            print(names[int(c)])
-            if (names[int(c)]=='plastic'):
-                for i in range(0,90):
-                    #rotateservo(pin,i)
-                    print("90 degree")
-            elif (names[int(c)]=='non-plastic'):
-                for i in range(0,180):
-                    print("180 degree")
-                    #rotateservo(pin,i)
-            else:
-                continue
+        boxes = r.boxes
 
+    for box in boxes:
+    # bounding box
+        x1, y1, x2, y2 = box.xyxy[0]
+        x1, y1, x2, y2 = int(x1), int(y1), int(x2), int(y2) # convert to int values
+
+    # put box in cams
+        cv2.rectangle(img, (x1, y1), (x2, y2), (255, 0, 255), 3)
+
+    # confidence
+    confidence = math.ceil((box.conf[0]*100))/100
+    print("Confidence =",confidence)
+
+    # class name
+    cls = int(box.cls[0])
+    print("Class name =", classNames[cls])
+
+    # object details
+    org = [x1, y1]
+    font = cv2.FONT_HERSHEY_SIMPLEX
+    fontScale = 1
+    color = (255, 0, 0)
+    thickness = 2
+
+    cv2.putText(img, classNames[cls], org, font, fontScale, color, thickness)
+    
+    if classNames=="plastic":
+        for i in range(0,90,0.5):
+            rotateservo(pin1,i)
+            print("90 degree")
+        break
+
+    cv2.imshow('Webcam', img)
+    if cv2.waitKey(1) == ord('q'):
+        break
+
+cap.release()
+cv2.destroyAllWindows()
+cap.release()
+cv2.destroyAllWindows()
