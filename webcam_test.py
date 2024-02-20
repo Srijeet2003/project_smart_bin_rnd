@@ -31,6 +31,7 @@ classNames = ["non-plastic", "plastic"]
 
 # Variable to track if plastic is detected
 plastic_detected = False
+non_plastic_detected = False
 
 try:
     while True:
@@ -70,10 +71,22 @@ try:
                     print("Rotating servo")
                 plastic_detected = True
 
+            elif classNames[cls] == "non-plastic":
+                # Handle non-plastic detection here
+                # For example, you can rotate another servo connected to pin2
+                for i in range(135, 90, -5):  # Adjust the range and increment to limit the movement
+                    rotateservo(pin1, i)
+                    print("Rotating another servo")
+                non_plastic_detected = True
+                
         # If plastic is detected, stop the servo
         if plastic_detected:
             board.digital[pin1].write(90)  # Set the servo to its default position
             plastic_detected = False  # Reset the flag
+            
+        if non_plastic_detected:
+            board.digital[pin1].write(90)  # Set the other servo to its default position
+            non_plastic_detected = False  # Reset the flag
 
         # Display frame
         cv2.imshow('Webcam', img)
