@@ -1,74 +1,87 @@
-#!/usr/bin/env python
-# coding: utf-8
-
 from ultralytics import YOLO
-model=YOLO('last (6).pt')
-
 import cv2
 import math
 import matplotlib.pyplot as plt
-
-from pyfirmata import Arduino,SERVO,util
+from pyfirmata import Arduino, SERVO, util
 from time import sleep
+
+# Initialize Arduino board and servo pins
 port = '/dev/ttyACM0'
 pin1 = 10
 pin2 = 11
 board = Arduino(port)
 board.digital[pin1].mode = SERVO
 board.digital[pin2].mode = SERVO
-def rotateservo(pin,angle):
-    board.digital[pin].write(angle)
-    sleep(0.015)
 
+# Function to rotate servo motor
+def rotateservo(pin, angle):
+    board.digital[pin].write(angle)
+    sleep(0.5)  # Adjust the sleep duration to control the speed of the servo
+
+# Load YOLO model
+model = YOLO('last (6).pt')
+
+# Initialize webcam
 cap = cv2.VideoCapture(0)
 cap.set(3, 1080)
 cap.set(4, 720)
 
-classNames=["non-plastic","plastic"]
+# Define class names
+classNames = ["non-plastic", "plastic"]
 
-while True:
-    ret, img= cap.read()
-    results = model(img, stream=True)
+# Variable to track if plastic is detected
+plastic_detected = False
 
-    for r in results:
-        boxes = r.boxes
+try:
+    while True:
+        # Read frame from webcam
+        ret, img = cap.read()
 
-    for box in boxes:
-    # bounding box
-        x1, y1, x2, y2 = box.xyxy[0]
-        x1, y1, x2, y2 = int(x1), int(y1), int(x2), int(y2) # convert to int values
+        # Perform object detection using YOLO
+        results = model(img, stream=True)
 
-    # put box in cams
-        cv2.rectangle(img, (x1, y1), (x2, y2), (255, 0, 255), 3)
+        for r in results:
+            boxes = r.boxes
 
-    # confidence
-    confidence = math.ceil((box.conf[0]*100))/100
-    print("Confidence =",confidence)
+        for box in boxes:
+            # Get box coordinates
+            x1, y1, x2, y2 = box.xyxy[0]
+            x1, y1, x2, y2 = int(x1), int(y1), int(x2), int(y2)
 
-    # class name
-    cls = int(box.cls[0])
-    print("Class name =", classNames[cls])
+            # Draw bounding box
+            cv2.rectangle(img, (x1, y1), (x2, y2), (255, 0, 255), 3)
 
-    # object details
-    org = [x1, y1]
-    font = cv2.FONT_HERSHEY_SIMPLEX
-    fontScale = 1
-    color = (255, 0, 0)
-    thickness = 2
+            # Get confidence and class name
+            confidence = math.ceil((box.conf[0] * 100)) / 100
+            cls = int(box.cls[0])
 
-    cv2.putText(img, classNames[cls], org, font, fontScale, color, thickness)
-    
-    if classNames=="plastic":
-        for i in range(0,90,0.5):
-            rotateservo(pin1,i)
-            print("90 degree")
-        break
+            # Display confidence and class name
+            org = [x1, y1]
+            font = cv2.FONT_HERSHEY_SIMPLEX
+            fontScale = 1
+            color = (255, 0, 0)
+            thickness = 2
+            cv2.putText(img, classNames[cls], org, font, fontScale, color, thickness)
 
-    cv2.imshow('Webcam', img)
-    if cv2.waitKey(1) == ord('q'):
-        break
+            # If object is plastic, rotate servo motor
+            if classNames[cls] == "plastic":
+                for i in range(0, 90):  # Adjust the range and increment to limit the movement
+                    rotateservo(pin1, i)
+                    print("Rotating servo")
+                plastic_detected = True
 
-cap.release()
-cv2.destroyAllWindows()
-cap.release()
-cv2.destroyAllWindows()
+        # If plastic is detected, stop the servo
+        if plastic_detected:
+            board.digital[pin1].write(90)  # Set the servo to its default position
+            plastic_detected = False  # Reset the flag
+
+        # Display frame
+        cv2.imshow('Webcam', img)
+
+        # Break loop if 'q' is pressed
+        if cv2.waitKey(1) == ord('q'):
+            break
+
+finally:
+    # Stop servo and release webcam when the program is terminated
+    board.digital[pin1].write(90) 

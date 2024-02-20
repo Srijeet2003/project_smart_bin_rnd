@@ -16,15 +16,15 @@ board.digital[pin2].mode = SERVO
 # Function to rotate servo motor
 def rotateservo(pin, angle):
     board.digital[pin].write(angle)
-    sleep(0.1)  # Adjust the sleep duration to control the speed of the servo
+    sleep(0.05)  # Adjust the sleep duration to control the speed of the servo
 
 # Load YOLO model
 model = YOLO('last (6).pt')
 
 # Initialize webcam
 cap = cv2.VideoCapture(0)
-cap.set(3, 1080)
-cap.set(4, 720)
+cap.set(3, 640)  # Set frame width
+cap.set(4, 480)  # Set frame height
 
 # Define class names
 classNames = ["non-plastic", "plastic"]
@@ -65,7 +65,7 @@ try:
 
             # If object is plastic, rotate servo motor
             if classNames[cls] == "plastic":
-                for i in range(0, 90, 5):  # Adjust the range and increment to limit the movement
+                for i in range(45, 90, 5):  # Adjust the range and increment to limit the movement
                     rotateservo(pin1, i)
                     print("Rotating servo")
                 plastic_detected = True
@@ -84,4 +84,6 @@ try:
 
 finally:
     # Stop servo and release webcam when the program is terminated
-    board.digital[pin1].write(90) 
+    board.digital[pin1].write(90)
+    cap.release()
+    cv2.destroyAllWindows()
