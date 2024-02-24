@@ -1,14 +1,15 @@
 #include <LiquidCrystal.h>
 LiquidCrystal lcd(8,9,10,11,12,13);
 #include <SoftwareSerial.h>
-SoftwareSerial mySerial(1,0);
-#include <TinyGPS++.h>
-int RXPin = 4;
-int TXPin = 5;
-int GPSBaud = 9600;
-TinyGPSPlus gps;
-SoftwareSerial gpsSerial(RXPin, TXPin);
+SoftwareSerial mySerial(5,4); //rx, tx
+//#include <TinyGPS++.h>
+//int RXPin = 4;
+//int TXPin = 5;
+//int GPSBaud = 9600;
+//TinyGPSPlus gps;
+//SoftwareSerial gpsSerial(RXPin, TXPin);
 int contrast=75;
+char w;
 
 // constants won't change
 const int TRIG_PIN = 2; // Arduino pin connected to Ultrasonic Sensor's TRIG pin
@@ -22,7 +23,7 @@ float duration_us, distance_cm;
 
 void setup() {
   analogWrite(6,contrast);
-  gpsSerial.begin(GPSBaud);
+//  gpsSerial.begin(GPSBaud);
   Serial.begin (9600);// initialize serial port
   pinMode(TRIG_PIN, OUTPUT); // set arduino pin to output mode
   pinMode(ECHO_PIN, INPUT);  // set arduino pin to input mode
@@ -32,7 +33,8 @@ void setup() {
   lcd.begin(16, 2);
   lcd.clear();
 
-//  mySerial.begin(9600);
+  mySerial.begin(9600);
+  delay(1000);
 //  Serial.println("Initializing");
 //  delay(1000);
 //  mySerial.println("AT");
@@ -68,7 +70,25 @@ void loop() {
     lcd.print("please empty bin");
     delay(1000);
     lcd.clear();
+
+    if (mySerial.available()){ // for serial monitor
+      w=mySerial.read();
+      Serial.println(w); //pc
+      delay(10);
+    }
+
+    if (Serial.available()){ // for device app
+      w=Serial.read();
+      mySerial.println(w); //phone
+      delay(10);
+    }
+
+    mySerial.println("the smartbin is full");
+    mySerial.println("Please empty the bin");
+    mySerial.println();
+    delay(2000);
   }
+  
   if(distance_cm < DISTANCE_THRESHOLD_2 && distance_cm >= DISTANCE_THRESHOLD_1){
     digitalWrite(A0, HIGH); // turn on LED
     digitalWrite(A1, HIGH);
