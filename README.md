@@ -40,37 +40,49 @@ waste management.
 * PyFirmara
 * Bluetooth terminator app
 
-## Future work
+## Conclusion
 
-Any advise for common problems or issues.
-```
-command to run if program contains helper info
-```
+The future of IoT-based smart dustbins entails advancements
+in AI and ML algorithms for predicting waste generation,
+optimizing collections, and improving sorting accuracy. Our
+system was able to detect plastic and non-plastic fairly with
+good accuracy. The Bluetooth module along with the LCD
+was used to indicate the live status of the smart bin. Financial
+constraints, connectivity issues, and privacy concerns may
+hinder adoption, necessitating energy-efficient tech and edge
+computing. Overcoming prototype challenges like data
+inconsistency and mechanical issues is vital. Addressing
+obstacles like cost, connectivity, and privacy is crucial.
+Innovative solutions such as energy-efficient tech and edge
+computing are necessary for effective smart dustbin operation
+in diverse urban environments, ensuring improved waste
+management.
 
 ## Authors
 
 Contributors names and contact info
 
-ex. Dominique Pizzie  
-ex. [@DomPizzie](https://twitter.com/dompizzie)
+- Shriya Chowdhury
+- Soumo Roy
+- Dishanwita Ghosh Chowdhury
+- Srijeet Chakraborty
+- Khyati Priya Jain
+- Budhaditya Bhattacharyya
 
-## Version History
+## Citation
 
-* 0.2
-    * Various bug fixes and optimizations
-    * See [commit change]() or See [release history]()
-* 0.1
-    * Initial Release
-
-## License
-
-This project is licensed under the [NAME HERE] License - see the LICENSE.md file for details
+```
+@inproceedings{chowdhury2024skids,
+  title={SKIDS: An Object Classification and Smart Communication based Waste Bin},
+  author={Chowdhury, Shriya and Roy, Soumo and Chowdhury, Dishanwita Ghosh and Chakraborty, Srijeet and Jain, Khyati Priya and Bhattacharyya, Budhaditya},
+  booktitle={2024 3rd International Conference on Artificial Intelligence For Internet of Things (AIIoT)},
+  pages={1--6},
+  year={2024},
+  organization={IEEE}
+}
+```
 
 ## Acknowledgments
 
-Inspiration, code snippets, etc.
-* [awesome-readme](https://github.com/matiassingers/awesome-readme)
-* [PurpleBooth](https://gist.github.com/PurpleBooth/109311bb0361f32d87a2)
-* [dbader](https://github.com/dbader/readme-template)
-* [zenorocha](https://gist.github.com/zenorocha/4526327)
-* [fvcproductions](https://gist.github.com/fvcproductions/1bfc2d4aecb01a834b46)
+We would like to thank our professor Dr. Buddhaditya
+Bhattacharya for his support, guidance and valuable time.
